@@ -1,0 +1,145 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    devDependencies:
+      '@neton/application-front-contract':
+        specifier: file:../neton-application-front/packages/front-contract
+        version: file:../neton-application-front/packages/front-contract
+      '@neton/application-front-kit':
+        specifier: file:../neton-application-front/packages/front-kit
+        version: file:../neton-application-front/packages/front-kit(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@neton/application-front-resource':
+        specifier: file:../neton-application-front/packages/front-resource
+        version: file:../neton-application-front/packages/front-resource(@neton/application-front-kit@file:../neton-application-front/packages/front-kit(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@neton/application-front-runtime@file:../neton-application-front/packages/front-runtime(@tanstack/react-query@5.101.2(react@19.2.7))(react@19.2.7))(react@19.2.7)
+      '@neton/application-front-runtime':
+        specifier: file:../neton-application-front/packages/front-runtime
+        version: file:../neton-application-front/packages/front-runtime(@tanstack/react-query@5.101.2(react@19.2.7))(react@19.2.7)
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.17)
+      react:
+        specifier: ^19.2.0
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.7(react@19.2.7)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.7.2
+
+packages:
+
+  '@neton/application-front-contract@file:../neton-application-front/packages/front-contract':
+    resolution: {directory: ../neton-application-front/packages/front-contract, type: directory}
+
+  '@neton/application-front-kit@file:../neton-application-front/packages/front-kit':
+    resolution: {directory: ../neton-application-front/packages/front-kit, type: directory}
+    peerDependencies:
+      react: ^19.0.0
+      react-dom: ^19.0.0
+
+  '@neton/application-front-resource@file:../neton-application-front/packages/front-resource':
+    resolution: {directory: ../neton-application-front/packages/front-resource, type: directory}
+    peerDependencies:
+      '@neton/application-front-kit': ^1.0.0
+      '@neton/application-front-runtime': ^1.0.0
+      react: ^19.0.0
+
+  '@neton/application-front-runtime@file:../neton-application-front/packages/front-runtime':
+    resolution: {directory: ../neton-application-front/packages/front-runtime, type: directory}
+    peerDependencies:
+      '@tanstack/react-query': ^5.0.0
+      react: ^19.0.0
+
+  '@tanstack/query-core@5.101.2':
+    resolution: {integrity: sha512-hH5MLoJhF7KaIGd7q3xTXGXvslI+GYlM1Z/35aSHHWaCJWB7XvTSHYuV3eM7tw+aE0mT/xMro4M4Q9rCGHT0lw==, tarball: https://registry.npmmirror.com/@tanstack/query-core/-/query-core-5.101.2.tgz}
+
+  '@tanstack/react-query@5.101.2':
+    resolution: {integrity: sha512-seDkr6kzGzX1okaaTtZPtgA688CDPlXUz1C6xSg0ESqn04Vuc8tlrYms1s3de+znBqhPVxFRfpAfUf+6XvfPWg==, tarball: https://registry.npmmirror.com/@tanstack/react-query/-/react-query-5.101.2.tgz}
+    peerDependencies:
+      react: ^18 || ^19
+
+  '@types/react-dom@19.2.3':
+    resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==, tarball: https://registry.npmmirror.com/@types/react-dom/-/react-dom-19.2.3.tgz}
+    peerDependencies:
+      '@types/react': ^19.2.0
+
+  '@types/react@19.2.17':
+    resolution: {integrity: sha512-MXfmqaVPEVgkBT/aY0aGCkRWWtByiYQXo3xdQ8r5RzuFrPiRn8Gar2tQdXSUQ2GKV3bkXckek89V8wQBY2Q/Aw==, tarball: https://registry.npmmirror.com/@types/react/-/react-19.2.17.tgz}
+
+  csstype@3.2.3:
+    resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==, tarball: https://registry.npmmirror.com/csstype/-/csstype-3.2.3.tgz}
+
+  react-dom@19.2.7:
+    resolution: {integrity: sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ==, tarball: https://registry.npmmirror.com/react-dom/-/react-dom-19.2.7.tgz}
+    peerDependencies:
+      react: ^19.2.7
+
+  react@19.2.7:
+    resolution: {integrity: sha512-HNe9WslTbXmFK8o8cmwgAeJFSBvt1bPdHCVKtaaV+WlAN36mpT4hcRpwbf3fY56ar2oIXzsBpOAiIRHAdY0OlQ==, tarball: https://registry.npmmirror.com/react/-/react-19.2.7.tgz}
+    engines: {node: '>=0.10.0'}
+
+  scheduler@0.27.0:
+    resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==, tarball: https://registry.npmmirror.com/scheduler/-/scheduler-0.27.0.tgz}
+
+  typescript@5.7.2:
+    resolution: {integrity: sha512-i5t66RHxDvVN40HfDd1PsEThGNnlMCMT3jMUuoh9/0TaqWevNontacunWyN02LA9/fIbEWlcHZcgTKb9QoaLfg==, tarball: https://registry.npmmirror.com/typescript/-/typescript-5.7.2.tgz}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+snapshots:
+
+  '@neton/application-front-contract@file:../neton-application-front/packages/front-contract': {}
+
+  '@neton/application-front-kit@file:../neton-application-front/packages/front-kit(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+
+  '@neton/application-front-resource@file:../neton-application-front/packages/front-resource(@neton/application-front-kit@file:../neton-application-front/packages/front-kit(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@neton/application-front-runtime@file:../neton-application-front/packages/front-runtime(@tanstack/react-query@5.101.2(react@19.2.7))(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@neton/application-front-kit': file:../neton-application-front/packages/front-kit(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@neton/application-front-runtime': file:../neton-application-front/packages/front-runtime(@tanstack/react-query@5.101.2(react@19.2.7))(react@19.2.7)
+      react: 19.2.7
+
+  '@neton/application-front-runtime@file:../neton-application-front/packages/front-runtime(@tanstack/react-query@5.101.2(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@tanstack/react-query': 5.101.2(react@19.2.7)
+      react: 19.2.7
+
+  '@tanstack/query-core@5.101.2': {}
+
+  '@tanstack/react-query@5.101.2(react@19.2.7)':
+    dependencies:
+      '@tanstack/query-core': 5.101.2
+      react: 19.2.7
+
+  '@types/react-dom@19.2.3(@types/react@19.2.17)':
+    dependencies:
+      '@types/react': 19.2.17
+
+  '@types/react@19.2.17':
+    dependencies:
+      csstype: 3.2.3
+
+  csstype@3.2.3: {}
+
+  react-dom@19.2.7(react@19.2.7):
+    dependencies:
+      react: 19.2.7
+      scheduler: 0.27.0
+
+  react@19.2.7: {}
+
+  scheduler@0.27.0: {}
+
+  typescript@5.7.2: {}
