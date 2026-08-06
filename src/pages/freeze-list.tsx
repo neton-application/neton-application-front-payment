@@ -6,12 +6,9 @@ import type { PageResponse } from "@neton/application-front-runtime/types";
 import { formatDateTime } from "@neton/application-front-runtime/types";
 import { Button,DataTable,Drawer,Field,FilterPanel,Input,PageHeader,Pagination,RowActions,Select,type DataColumn } from "@neton/application-front-kit";
 
-interface Freeze{id:number;walletId:number;userId:number;freezeType:number;amount:number|null;status:number;refType:number;refId:string;reasonCode?:string|null;reasonText?:string|null;operatorId:number;expiresAt:number;createdAt:number;releasedAt:number}
-const TYPES:Record<number,string>={1:"提现冻结",2:"单笔风控",3:"账户冻结"};
-// 三种终态含义不同，不许合并成一个「已解冻」（spec WALLET_FREEZE_SPEC §3.1）。
-const STATUS:Record<number,string>={0:"冻结中",1:"已解除",2:"已扣除",3:"已到期"};
-const money=(v:number|null)=>v==null?"全额":"¥"+(v/100).toLocaleString("zh-CN",{minimumFractionDigits:2,maximumFractionDigits:2});
-const expired=(r:Freeze)=>r.status===0&&r.expiresAt>0&&r.expiresAt<Date.now();
+// 模型与文案共享给钱包页（钱包页的「冻结记录」抽屉读同一批状态）。
+import type { Freeze } from "../lib/freeze";
+import { FREEZE_TYPES as TYPES, freezeExpired as expired, freezeMoney as money, FREEZE_STATUS as STATUS } from "../lib/freeze";
 
 export default function Page(){
  const client=useQueryClient();
