@@ -30,7 +30,7 @@ export default function Page(){
  const done=async()=>{setMode(null);setSelected(null);setError(null);await client.invalidateQueries({queryKey:["pay-freeze"]});await client.invalidateQueries({queryKey:["pay-wallet"]})};
  const fail=(cause:Error)=>setError(cause.message);
  const placeRisk=useMutation({mutationFn:()=>apiWrite<Freeze>("/admin/wallet/freeze/risk-hold","POST",{userId:Number(risk.userId),amount:risk.amount,refId:risk.refId.trim(),reasonText:risk.reasonText.trim()||null}),onSuccess:async()=>{setRisk({userId:"",amount:0,refId:"",reasonText:""});await done()},onError:fail});
- const placeJudicial=useMutation({mutationFn:()=>apiWrite<Freeze>("/admin/wallet/freeze/judicial","POST",{userId:Number(jud.userId),targetAmount:jud.targetAmount?Number(jud.targetAmount):null,legalDocNo:jud.legalDocNo.trim(),reasonText:jud.reasonText.trim()||null,expiresAt:jud.expiresAt?Number(jud.expiresAt):0}),onSuccess:async()=>{setJud({userId:"",targetAmount:"",legalDocNo:"",confirmDocNo:"",reasonText:"",expiresAt:""});await done()},onError:fail});
+ const placeJudicial=useMutation({mutationFn:()=>apiWrite<Freeze>("/admin/wallet/freeze/judicial","POST",{userId:Number(jud.userId),targetAmount:null,legalDocNo:jud.legalDocNo.trim()||null,reasonText:jud.reasonText.trim()||null,expiresAt:jud.expiresAt?Number(jud.expiresAt):0}),onSuccess:async()=>{setJud({userId:"",targetAmount:"",legalDocNo:"",confirmDocNo:"",reasonText:"",expiresAt:""});await done()},onError:fail});
  const release=useMutation({mutationFn:()=>{if(!selected)throw new Error("未选择冻结记录");return apiWrite<boolean>("/admin/wallet/freeze/release/"+selected.id,"POST",{})},onSuccess:done,onError:fail});
  // 到期本身不需要点这个：过期的冻结在可用余额计算里当场失效，这里只是把状态追上事实。
  const sweep=useMutation({mutationFn:()=>apiWrite<number>("/admin/wallet/freeze/sweep-expired","POST",{}),onSuccess:done,onError:fail});
@@ -103,16 +103,15 @@ export default function Page(){
 
   <Drawer open={mode==="judicial"} onClose={()=>setMode(null)} title="账户冻结（司法）"
    description="对用户资产的强制处分。留空目标额 = 全额冻结，后续到账继续吸收。"
-   footer={<><Button variant="ghost" onClick={()=>setMode(null)}>取消</Button><Button variant="destructive" disabled={placeJudicial.isPending||!jud.userId||!jud.legalDocNo.trim()||jud.confirmDocNo.trim()!==jud.legalDocNo.trim()} onClick={()=>placeJudicial.mutate()}>{placeJudicial.isPending?"处理中…":"确认冻结"}</Button></>}>
+   footer={<><Button variant="ghost" onClick={()=>setMode(null)}>取消</Button><Button variant="destructive" disabled={placeJudicial.isPending||!jud.userId||(jud.legalDocNo.trim()!==""&&jud.confirmDocNo.trim()!==jud.legalDocNo.trim())} onClick={()=>placeJudicial.mutate()}>{placeJudicial.isPending?"处理中…":"确认冻结"}</Button></>}>
    {error&&<div className="mb-4 rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</div>}
    <div className="space-y-4">
     <Field label="用户 ID（必填）"><Input value={jud.userId} onChange={e=>setJud({...jud,userId:e.target.value.replace(/\D/g,"")})}/></Field>
-    <Field label="目标冻结额（分，留空=全额）"><Input type="number" min={1} value={jud.targetAmount} onChange={e=>setJud({...jud,targetAmount:e.target.value.replace(/\D/g,"")})}/></Field>
-    <Field label="法律文书号（必填，幂等键）"><Input value={jud.legalDocNo} onChange={e=>setJud({...jud,legalDocNo:e.target.value})}/></Field>
+    <Field label="法律文书号（选填，填了即幂等键并显示给用户）"><Input value={jud.legalDocNo} onChange={e=>setJud({...jud,legalDocNo:e.target.value})}/></Field>
     <Field label="到期时间（epoch 毫秒，留空=无期限）"><Input value={jud.expiresAt} onChange={e=>setJud({...jud,expiresAt:e.target.value.replace(/\D/g,"")})}/></Field>
-    <Field label="冻结依据（可选，不下发给用户）"><Input value={jud.reasonText} onChange={e=>setJud({...jud,reasonText:e.target.value})}/></Field>
+    <Field label="冻结说明（用户可见）"><Input value={jud.reasonText} onChange={e=>setJud({...jud,reasonText:e.target.value})} placeholder="会显示在用户 App 的冻结详情里，不要写办案细节"/></Field>
     {/* 二次确认绑在文书号上而不是一个复选框：要求经办人再核对一遍写的是哪份文书。 */}
-    <Field label="再次输入法律文书号以确认"><Input value={jud.confirmDocNo} onChange={e=>setJud({...jud,confirmDocNo:e.target.value})}/></Field>
+    <Field label="再次输入法律文书号以确认（填了文书号才需要）"><Input value={jud.confirmDocNo} onChange={e=>setJud({...jud,confirmDocNo:e.target.value})}/></Field>
    </div>
   </Drawer>
 
