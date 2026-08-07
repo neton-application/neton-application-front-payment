@@ -91,13 +91,13 @@ export default function Page(){
 
   <Drawer open={mode==="risk"} onClose={()=>setMode(null)} title="单笔风控冻结"
    description="金额固定。可用余额不足会直接失败，不会悄悄冻一个更小的数。"
-   footer={<><Button variant="ghost" onClick={()=>setMode(null)}>取消</Button><Button disabled={placeRisk.isPending||!risk.userId||risk.amount<=0||!risk.refId.trim()} onClick={()=>placeRisk.mutate()}>{placeRisk.isPending?"处理中…":"确认冻结"}</Button></>}>
+   footer={<><Button variant="ghost" onClick={()=>setMode(null)}>取消</Button><Button disabled={placeRisk.isPending||!risk.userId||risk.amount<=0} onClick={()=>placeRisk.mutate()}>{placeRisk.isPending?"处理中…":"确认冻结"}</Button></>}>
    {error&&<div className="mb-4 rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</div>}
    <div className="space-y-4">
     <Field label="用户 ID（必填）"><Input value={risk.userId} onChange={e=>setRisk({...risk,userId:e.target.value.replace(/\D/g,"")})}/></Field>
     <Field label="冻结金额（分，必填）"><Input type="number" min={1} value={risk.amount} onChange={e=>setRisk({...risk,amount:Number(e.target.value)})}/></Field>
-    <Field label="业务单号（必填，幂等键）"><Input value={risk.refId} onChange={e=>setRisk({...risk,refId:e.target.value})} placeholder="触发冻结的账变流水 id，或唯一工单号"/></Field>
-    <Field label="冻结原因（可选）"><Input value={risk.reasonText} onChange={e=>setRisk({...risk,reasonText:e.target.value})}/></Field>
+    <Field label="业务单号（选填，填了即幂等键）"><Input value={risk.refId} onChange={e=>setRisk({...risk,refId:e.target.value})} placeholder="账变流水 id 或工单号；留空则每次提交都是新记录"/></Field>
+    <Field label="冻结原因（用户可见）"><Input value={risk.reasonText} onChange={e=>setRisk({...risk,reasonText:e.target.value})} placeholder="会显示在用户 App 的冻结详情里，请用对方看得懂的话"/></Field>
    </div>
   </Drawer>
 
