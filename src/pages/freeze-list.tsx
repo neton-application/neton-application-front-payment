@@ -47,8 +47,11 @@ export default function Page(){
   {key:"created",header:"下达时间",cell:r=>formatDateTime(r.createdAt)},
   {key:"actions",header:"操作",headerClassName:"text-right",className:"text-right",cell:r=><RowActions
     primary={[{label:"详情",tone:"primary" as const,onClick:()=>{setSelected(r);setMode(null)}}]}
-    // 提现冻结由提现状态机管，这里不给解除入口——两个地方都能解就会双写。
-    more={r.status===0&&r.freezeType!==1&&perms.release?[{label:"解除冻结",danger:true,onClick:()=>open("release",r)}]:[]}/>}
+    // 提现冻结由提现状态机管：两处都能解就会双写——钱回到用户手上，提现单还停在
+    // PENDING 等打款。禁用而不是隐藏，隐藏会让人以为系统没有解冻能力。
+    more={r.status===0&&perms.release?[r.freezeType===1
+      ?{label:"解除冻结（提现单管理）",danger:true,disabled:true}
+      :{label:"解除冻结",danger:true,onClick:()=>open("release",r)}]:[]}/>}
  ];
 
  return <div className="space-y-4">
@@ -75,7 +78,14 @@ export default function Page(){
    <Pagination page={page} pageSize={pageSize} total={query.data?.total??0} loading={query.isFetching} onPageChange={setPage} onPageSizeChange={v=>{setPageSize(v);setPage(1)}}/>
   </section>
 
-  <Drawer open={Boolean(selected&&!mode)} onClose={()=>setSelected(null)} title="冻结详情" widthClassName="max-w-2xl">
+  <Drawer open={Boolean(selected&&!mode)} onClose={()=>setSelected(null)} title="冻结详情" widthClassName="max-w-2xl"
+   footer={selected?<div className="flex w-full items-center justify-between gap-3">
+    <span className="text-[11px] text-[var(--muted-foreground)]">{selected.status!==0?"该冻结已结束，无需解除":selected.freezeType===1?"提现冻结由提现单管理，请到「提现管理」驳回或标记失败":""}</span>
+    <div className="flex items-center gap-2">
+     <Button variant="ghost" onClick={()=>setSelected(null)}>关闭</Button>
+     {selected.status===0&&selected.freezeType!==1&&perms.release&&<Button variant="destructive" onClick={()=>open("release",selected)}>解除冻结</Button>}
+    </div>
+   </div>:undefined}>
    {selected&&<dl className="overflow-hidden rounded-xl border border-[var(--border)]">{([
      ["冻结 ID",selected.id],["用户 ID",selected.userId],["钱包 ID",selected.walletId],
      ["类型",TYPES[selected.freezeType]??selected.freezeType],
