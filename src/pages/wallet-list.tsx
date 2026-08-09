@@ -20,7 +20,7 @@ const money=(value:number)=>"¥"+(value/100).toLocaleString("zh-CN",{minimumFrac
 export default function Page(){
  const client=useQueryClient(); const canUpdate=usePermission("pay:wallet:update"); const canOverview=usePermission("pay:wallet:overview"); const canTx=usePermission("pay:wallet-transaction:page");
  // 看掩码卡（客服/风控日常）和解密完整卡号（打款）是两个权限点，故意不合并。
- const canCards=usePermission("pay:bank-card:list"); const canReveal=usePermission("pay:bank-card:reveal");
+ const canCards=usePermission("pay:bank-card:list"); const canReveal=usePermission("pay:bank-card:reveal"); const canUnbind=usePermission("pay:bank-card:unbind");
  const canFreezes=usePermission("pay:wallet-freeze:list"); const canRelease=usePermission("pay:wallet-freeze:release");
  const [page,setPage]=React.useState(1); const [pageSize,setPageSize]=React.useState(20);
  // 处理投诉的人手上通常只有昵称或手机号，不会有 user id
@@ -37,6 +37,8 @@ export default function Page(){
  const overview=useQuery({queryKey:["pay-wallet-overview"],queryFn:()=>apiFetch<Overview>("/admin/pay/wallet/overview"),enabled:canOverview});
  const tx=useQuery({queryKey:["pay-wallet-tx",selected?.id],queryFn:()=>apiFetch<PageResponse<Tx>>("/admin/pay/wallet-transaction/page-by-wallet?pageNo=1&pageSize=50&walletId="+selected?.id),enabled:Boolean(selected&&canTx)});
  const cards=useQuery({queryKey:["pay-bank-cards",cardsOf?.userId],queryFn:()=>apiFetch<BankCard[]>("/admin/wallet/bank-cards/user/"+cardsOf?.userId),enabled:Boolean(cardsOf&&canCards)});
+ // 解绑：有未打款的提现单占着这张卡时服务端会拒绝并说明是哪几笔，原样透出。
+ const unbindCard=useMutation({mutationFn:(id:number)=>apiWrite<boolean>("/admin/wallet/bank-cards/unbind/"+id,"POST",{}),onSuccess:async()=>{await client.invalidateQueries({queryKey:["pay-bank-cards"]})},onError:(cause:Error)=>setError(cause.message)});
  const reveal=useMutation({mutationFn:(id:number)=>apiWrite<string>("/admin/wallet/bank-cards/reveal/"+id,"POST",{}),onSuccess:(full:string,id:number)=>setRevealed(prev=>({...prev,[id]:full}))});
  // 「冻结金额」这列只说冻了多少，说不出**是什么冻的**——归因得看冻结记录
  // （spec：freeze_price 是缓存，不许从这个数反推）。这里按 userId 直接拉这个人的记录。
@@ -89,7 +91,10 @@ export default function Page(){
    {key:"no",header:"卡号",cell:(r:BankCard)=><code>{revealed[r.id]??r.cardNoMasked}</code>},
    {key:"status",header:"状态",cell:(r:BankCard)=>r.status===0?"正常":"停用"},
    {key:"time",header:"绑定时间",cell:(r:BankCard)=>r.createdAt?formatDateTime(r.createdAt):"-"},
-   {key:"actions",header:"操作",headerClassName:"text-right",className:"text-right",cell:(r:BankCard)=>canReveal&&!revealed[r.id]?<Button variant="ghost" disabled={reveal.isPending} onClick={()=>reveal.mutate(r.id)}>查看完整卡号</Button>:null},
+   {key:"actions",header:"操作",headerClassName:"text-right",className:"text-right",cell:(r:BankCard)=><div className="flex items-center justify-end gap-1">
+    {canReveal&&!revealed[r.id]&&<Button variant="ghost" disabled={reveal.isPending} onClick={()=>reveal.mutate(r.id)}>查看完整卡号</Button>}
+    {canUnbind&&<Button variant="ghost" className="text-red-600" disabled={unbindCard.isPending} onClick={()=>{if(confirm("解绑这张卡？该用户将无法用它提现，操作会记入敏感操作审计"))unbindCard.mutate(r.id)}}>解绑</Button>}
+   </div>},
   ]} rows={cards.data??[]} rowKey={(r:BankCard)=>r.id} loading={cards.isPending} error={cards.error?.message} minWidth={760}/>}
   {canReveal&&<p className="mt-3 text-[11px] text-[var(--muted-foreground)]">解密完整卡号会记入敏感操作审计（经办人 / IP / 时间）。</p>}</Drawer>
   <Drawer open={Boolean(selected&&mode)} onClose={()=>setMode(null)} title={mode==="recharge"?"手工充值":"余额校正"} description={selected?"用户 "+selected.userId:undefined} footer={<><Button variant="ghost" onClick={()=>setMode(null)}>取消</Button><Button variant={mode==="recharge"?"default":"destructive"} disabled={mutate.isPending||!selected||amount<0||(mode==="recharge"&&(!remark.trim()||amount<=0))} onClick={()=>mutate.mutate()}>{mutate.isPending?"处理中…":"确认提交"}</Button></>}>{error&&<div className="mb-4 rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</div>}<div className="space-y-4"><Field label={mode==="recharge"?"充值金额（分）":"目标余额（分）"}><Input type="number" min={0} value={amount} onChange={e=>setAmount(Number(e.target.value))}/></Field>{mode==="recharge"&&<Field label="充值备注（必填）"><Input value={remark} onChange={e=>setRemark(e.target.value)} placeholder="银行汇款、异常补单等业务依据"/></Field>}</div></Drawer>
