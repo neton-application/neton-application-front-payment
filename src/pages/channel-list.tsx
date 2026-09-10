@@ -1,8 +1,9 @@
 "use client";
 import * as React from "react";
 import { ResourcePage } from "@neton/application-front-resource";
+import { useWorkspaceRoute } from "@neton/application-front-workspace";
 const status=[{label:"启用",value:1},{label:"停用",value:0}];
-export default function Page(){const[initialAppId,setInitialAppId]=React.useState<string|null>(null);React.useEffect(()=>setInitialAppId(new URLSearchParams(window.location.search).get("appId")??""),[]);if(initialAppId===null)return null;return <ResourcePage config={{
+export default function Page(){const route=useWorkspaceRoute();const initialAppId=route.params.id??route.query.appId??"";return <ResourcePage config={{
  resourceKey:"pay-channel",eyebrow:"PAYMENT ROUTING",title:"支付渠道",description:"按应用维护支付渠道、费率和通道配置。敏感配置只在授权人员编辑时处理。",
  endpoint:"/pay/channel",permissions:{page:"pay:channel:page",create:"pay:channel:create",update:"pay:channel:update",delete:"pay:channel:delete"},
  initialFilters:{appId:initialAppId},
