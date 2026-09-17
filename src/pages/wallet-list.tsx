@@ -18,10 +18,10 @@ interface Overview { walletCount:number; totalBalance:number; totalFrozen:number
 const money=(value:number)=>"¥"+(value/100).toLocaleString("zh-CN",{minimumFractionDigits:2,maximumFractionDigits:2});
 
 export default function Page(){
- const client=useQueryClient(); const canUpdate=usePermission("pay:wallet:update"); const canOverview=usePermission("pay:wallet:overview"); const canTx=usePermission("pay:wallet-transaction:page");
+ const client=useQueryClient(); const canUpdate=usePermission("pay:wallet:update"); const canOverview=usePermission("pay:wallet:query"); const canTx=usePermission("pay:wallet-transaction:query");
  // 看掩码卡（客服/风控日常）和解密完整卡号（打款）是两个权限点，故意不合并。
- const canCards=usePermission("pay:bank-card:list"); const canReveal=usePermission("pay:bank-card:reveal"); const canUnbind=usePermission("pay:bank-card:unbind");
- const canFreezes=usePermission("pay:wallet-freeze:list"); const canRelease=usePermission("pay:wallet-freeze:release");
+ const canCards=usePermission("pay:bank-card:query"); const canReveal=usePermission("pay:bank-card:reveal"); const canUnbind=usePermission("pay:bank-card:unbind");
+ const canFreezes=usePermission("pay:wallet-freeze:query"); const canRelease=usePermission("pay:wallet-freeze:release");
  const [page,setPage]=React.useState(1); const [pageSize,setPageSize]=React.useState(20);
  // 处理投诉的人手上通常只有昵称或手机号，不会有 user id
  const emptyFilters={userId:"",username:"",nickname:"",mobile:""};

@@ -12,7 +12,7 @@ import { FREEZE_TYPES as TYPES, freezeExpired as expired, freezeMoney as money, 
 
 export default function Page(){
  const client=useQueryClient();
- const perms={list:usePermission("pay:wallet-freeze:list"),place:usePermission("pay:wallet-freeze:place"),judicial:usePermission("pay:wallet-freeze:judicial"),release:usePermission("pay:wallet-freeze:release")};
+ const perms={list:usePermission("pay:wallet-freeze:query"),place:usePermission("pay:wallet-freeze:place"),judicial:usePermission("pay:wallet-freeze:judicial"),release:usePermission("pay:wallet-freeze:release")};
  const [page,setPage]=React.useState(1);const[pageSize,setPageSize]=React.useState(20);
  const [draft,setDraft]=React.useState({userId:"",freezeType:"",status:""});const[filters,setFilters]=React.useState(draft);
  const [selected,setSelected]=React.useState<Freeze|null>(null);
