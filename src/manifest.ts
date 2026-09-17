@@ -3,7 +3,7 @@ export default defineFrontModule({
   id:"payment",contractVersion:"1.0.0",
   pages:[
     {key:"pay/app/index",path:"/pay/app",entry:"app-list",rendering:"client"},
-    {key:"pay/channel/index",path:"/pay/app/:id/channels",entry:"channel-list",rendering:"client",standalone:true,identity:["id"],title:"支付渠道 · :id"},
+    {key:"pay/channel/index",path:"/pay/channel",entry:"channel-list",rendering:"client"},
     {key:"pay/order/index",path:"/pay/order",entry:"order-list",rendering:"client"},
     {key:"pay/refund/index",path:"/pay/refund",entry:"refund-list",rendering:"client"},
     {key:"pay/notify/index",path:"/pay/notify",entry:"notify-list",rendering:"client"},
