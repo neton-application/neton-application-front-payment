@@ -1,6 +1,7 @@
 import { defineFrontModule } from "@neton/application-front-contract";
 export default defineFrontModule({
   id:"payment",contractVersion:"1.0.0",
+  locales:[{lang:"zh-CN",entry:"zh-CN"},{lang:"en-US",entry:"en-US"}],
   pages:[
     {key:"pay/app/index",path:"/pay/app",entry:"app-list",rendering:"client"},
     {key:"pay/channel/index",path:"/pay/channel",entry:"channel-list",rendering:"client"},
