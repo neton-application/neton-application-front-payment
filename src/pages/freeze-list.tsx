@@ -5,7 +5,7 @@ import { useMutation,usePermission,useQuery,useQueryClient } from "@neton/applic
 import type { PageResponse } from "@neton/application-front-runtime/types";
 import { formatDateTime } from "@neton/application-front-runtime/types";
 import { useT } from "@neton/application-front-runtime/i18n";
-import { useDescribeError } from "@neton/application-front-runtime/errors";
+import { useDescribeError, useDescribeFieldErrors } from "@neton/application-front-runtime/errors";
 import { Button,DataTable,Drawer,Field,FilterPanel,Input,PageHeader,Pagination,RowActions,Select,type DataColumn } from "@neton/application-front-kit";
 
 // 模型与文案共享给钱包页（钱包页的「冻结记录」抽屉读同一批状态）。
@@ -20,7 +20,7 @@ function ReleaseSummary({text,id}:{text:string;id:number}){
 }
 
 export default function Page(){
- const t=useT("payment"); const describeError=useDescribeError();
+ const t=useT("payment"); const describeError=useDescribeError("payment"); const describeFieldErrors=useDescribeFieldErrors("payment");
  const TYPES=freezeTypes(t); const STATUS=freezeStatuses(t); const money=(v:null|number)=>freezeMoney(t,v);
  const client=useQueryClient();
  const perms={list:usePermission("pay:wallet-freeze:query"),place:usePermission("pay:wallet-freeze:place"),judicial:usePermission("pay:wallet-freeze:judicial"),release:usePermission("pay:wallet-freeze:release")};
@@ -30,7 +30,7 @@ export default function Page(){
  const [mode,setMode]=React.useState<"risk"|"judicial"|"release"|null>(null);
  const [risk,setRisk]=React.useState({userId:"",amount:0,refId:"",reasonText:""});
  const [jud,setJud]=React.useState({userId:"",targetAmount:"",legalDocNo:"",confirmDocNo:"",reasonText:"",expiresAt:""});
- const [error,setError]=React.useState<string|null>(null);
+ const [error,setError]=React.useState<string|null>(null); const [fieldErrors,setFieldErrors]=React.useState<Record<string,string>>({});
 
  const params=new URLSearchParams({pageNo:String(page),pageSize:String(pageSize)});
  if(filters.userId)params.set("userId",filters.userId);
@@ -38,15 +38,15 @@ export default function Page(){
  if(filters.status)params.set("status",filters.status);
  const query=useQuery({queryKey:["pay-freeze",page,pageSize,filters],queryFn:()=>apiFetch<PageResponse<Freeze>>("/admin/wallet/freeze/page?"+params),enabled:perms.list});
 
- const done=async()=>{setMode(null);setSelected(null);setError(null);await client.invalidateQueries({queryKey:["pay-freeze"]});await client.invalidateQueries({queryKey:["pay-wallet"]})};
- const fail=(cause:Error)=>setError(describeError(cause));
+ const done=async()=>{setMode(null);setSelected(null);setError(null);setFieldErrors({});await client.invalidateQueries({queryKey:["pay-freeze"]});await client.invalidateQueries({queryKey:["pay-wallet"]})};
+ const fail=(cause:Error)=>{setError(describeError(cause));setFieldErrors(describeFieldErrors(cause))};
  const placeRisk=useMutation({mutationFn:()=>apiWrite<Freeze>("/admin/wallet/freeze/risk-hold","POST",{userId:Number(risk.userId),amount:risk.amount,refId:risk.refId.trim(),reasonText:risk.reasonText.trim()||null}),onSuccess:async()=>{setRisk({userId:"",amount:0,refId:"",reasonText:""});await done()},onError:fail});
  const placeJudicial=useMutation({mutationFn:()=>apiWrite<Freeze>("/admin/wallet/freeze/judicial","POST",{userId:Number(jud.userId),targetAmount:null,legalDocNo:jud.legalDocNo.trim()||null,reasonText:jud.reasonText.trim()||null,expiresAt:jud.expiresAt?Number(jud.expiresAt):0}),onSuccess:async()=>{setJud({userId:"",targetAmount:"",legalDocNo:"",confirmDocNo:"",reasonText:"",expiresAt:""});await done()},onError:fail});
  const release=useMutation({mutationFn:()=>{if(!selected)throw new Error(t("freeze.error.noSelection"));return apiWrite<boolean>("/admin/wallet/freeze/release/"+selected.id,"POST",{})},onSuccess:done,onError:fail});
  // 到期本身不需要点这个：过期的冻结在可用余额计算里当场失效，这里只是把状态追上事实。
  const sweep=useMutation({mutationFn:()=>apiWrite<number>("/admin/wallet/freeze/sweep-expired","POST",{}),onSuccess:done,onError:fail});
 
- const open=(m:typeof mode,r?:Freeze)=>{setError(null);setSelected(r??null);setMode(m)};
+ const open=(m:typeof mode,r?:Freeze)=>{setError(null);setFieldErrors({});setSelected(r??null);setMode(m)};
 
  const columns:DataColumn<Freeze>[]=[
   {key:"id",header:t("freeze.column.freeze"),cell:r=><div><strong># {r.id}</strong><span className="block text-[10px] text-[var(--muted-foreground)]">{t("common.userLabel",{userId:r.userId})}</span></div>},
@@ -116,7 +116,7 @@ export default function Page(){
    {error&&<div className="mb-4 rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</div>}
    <div className="space-y-4">
     <Field label={t("freeze.field.userIdRequired")}><Input value={risk.userId} onChange={e=>setRisk({...risk,userId:e.target.value.replace(/\D/g,"")})}/></Field>
-    <Field label={t("freeze.risk.field.amount")}><Input type="number" min={1} value={risk.amount} onChange={e=>setRisk({...risk,amount:Number(e.target.value)})}/></Field>
+    <Field label={t("freeze.risk.field.amount")} error={fieldErrors.amount}><Input type="number" min={1} value={risk.amount} onChange={e=>setRisk({...risk,amount:Number(e.target.value)})}/></Field>
     <Field label={t("freeze.risk.field.refId")}><Input value={risk.refId} onChange={e=>setRisk({...risk,refId:e.target.value})} placeholder={t("freeze.risk.placeholder.refId")}/></Field>
     <Field label={t("freeze.risk.field.reason")}><Input value={risk.reasonText} onChange={e=>setRisk({...risk,reasonText:e.target.value})} placeholder={t("freeze.risk.placeholder.reason")}/></Field>
    </div>

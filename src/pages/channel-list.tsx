@@ -21,6 +21,7 @@ export default function Page() {
   ];
   return <ResourcePage config={{
     resourceKey: "pay-channel",
+    errorNamespace: "payment",
     eyebrow: t("channel.eyebrow"),
     title: t("channel.title"),
     description: t("channel.description"),

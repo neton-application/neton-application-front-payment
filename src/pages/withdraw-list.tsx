@@ -13,7 +13,7 @@ const statusLabels=(t:Translate)=>[0,1,2,3,4,5,6].map(i=>t("withdraw.status."+i)
 /** 提现单自带币种，按单上的币种换算小数位；缺省时走部署默认币种。 */
 const money=(v:number,currency?:string|null)=>formatMoney(v,currency||undefined);
 export default function Page(){
- const t=useT("payment"); const describeError=useDescribeError(); const labels=statusLabels(t);
+ const t=useT("payment"); const describeError=useDescribeError("payment"); const labels=statusLabels(t);
  const client=useQueryClient(); const perms={detail:usePermission("pay:withdraw:query"),approve:usePermission("pay:withdraw:approve"),reject:usePermission("pay:withdraw:reject"),paid:usePermission("pay:withdraw:mark-paid"),failed:usePermission("pay:withdraw:mark-failed")};
  const [page,setPage]=React.useState(1);const[pageSize,setPageSize]=React.useState(20);const[draft,setDraft]=React.useState({userId:"",status:""});const[filters,setFilters]=React.useState(draft);const[selected,setSelected]=React.useState<Withdraw|null>(null);const[action,setAction]=React.useState<"approve"|"reject"|"paid"|"failed"|null>(null);const[note,setNote]=React.useState("");const[error,setError]=React.useState<string|null>(null);
  const params=new URLSearchParams({pageNo:String(page),pageSize:String(pageSize)});if(filters.userId)params.set("userId",filters.userId);if(filters.status)params.set("status",filters.status);

@@ -5,7 +5,7 @@ import { useMutation, usePermission, useQuery, useQueryClient } from "@neton/app
 import type { PageResponse } from "@neton/application-front-runtime/types";
 import { formatDateTime, formatMoney } from "@neton/application-front-runtime/types";
 import { useT } from "@neton/application-front-runtime/i18n";
-import { useDescribeError } from "@neton/application-front-runtime/errors";
+import { useDescribeError, useDescribeFieldErrors } from "@neton/application-front-runtime/errors";
 import { Button, DataTable, Drawer, Field, FilterPanel, Input, PageHeader, Pagination, RowActions, type DataColumn } from "@neton/application-front-kit";
 
 /** accountFrozen：账户冻结没有金额，freezePrice 反映不出来，由后端单独带下来。 */
@@ -21,7 +21,7 @@ interface Overview { walletCount:number; totalBalance:number; totalFrozen:number
 const money=(value:number)=>formatMoney(value);
 
 export default function Page(){
- const t=useT("payment"); const describeError=useDescribeError(); const FREEZE_TYPES=freezeTypes(t);
+ const t=useT("payment"); const describeError=useDescribeError("payment"); const describeFieldErrors=useDescribeFieldErrors("payment"); const FREEZE_TYPES=freezeTypes(t);
  const client=useQueryClient(); const canUpdate=usePermission("pay:wallet:update"); const canOverview=usePermission("pay:wallet:query"); const canTx=usePermission("pay:wallet-transaction:query");
  // 看掩码卡（客服/风控日常）和解密完整卡号（打款）是两个权限点，故意不合并。
  const canCards=usePermission("pay:bank-card:query"); const canReveal=usePermission("pay:bank-card:reveal"); const canUnbind=usePermission("pay:bank-card:unbind");
@@ -34,7 +34,7 @@ export default function Page(){
  const [cardsOf,setCardsOf]=React.useState<Wallet|null>(null);
  const [freezesOf,setFreezesOf]=React.useState<Wallet|null>(null);
  // 解出来的明文只活在这个抽屉里：关掉就丢，下次要看得再解一次、再写一条审计。
- const [revealed,setRevealed]=React.useState<Record<number,string>>({}); const [amount,setAmount]=React.useState(0); const [remark,setRemark]=React.useState(""); const [error,setError]=React.useState<string|null>(null);
+ const [revealed,setRevealed]=React.useState<Record<number,string>>({}); const [amount,setAmount]=React.useState(0); const [remark,setRemark]=React.useState(""); const [error,setError]=React.useState<string|null>(null); const [fieldErrors,setFieldErrors]=React.useState<Record<string,string>>({});
  const params=new URLSearchParams({pageNo:String(page),pageSize:String(pageSize)});
  for(const [k,v] of Object.entries(filters)) if(v) params.set(k,v);
  const wallets=useQuery({queryKey:["pay-wallet",page,pageSize,filters],queryFn:()=>apiFetch<PageResponse<Wallet>>("/admin/pay/wallet/page?"+params)});
@@ -50,7 +50,7 @@ export default function Page(){
  // 账户解冻：这里只有钱包，没有冻结记录 id，所以走按钱包解除的端点。
  // 它只认账户冻结，不会顺手把在途提现的占用一起放了。
  const unfreeze=useMutation({mutationFn:(walletId:number)=>apiWrite<boolean>("/admin/wallet/freeze/release-account/"+walletId,"POST",{}),onSuccess:async()=>{await client.invalidateQueries({queryKey:["pay-wallet"]});await client.invalidateQueries({queryKey:["pay-freeze"]})},onError:(cause:Error)=>setError(describeError(cause))});
- const mutate=useMutation({mutationFn:()=>{if(!selected||!mode)throw new Error(t("wallet.error.noSelection")); return mode==="recharge"?apiWrite<void>("/admin/pay/wallet/manual-recharge","POST",{userId:selected.userId,amount,remark:remark.trim()}):apiWrite<void>("/admin/pay/wallet/update-balance","PUT",{userId:selected.userId,balance:amount})},onSuccess:async()=>{setMode(null);setAmount(0);setRemark("");await client.invalidateQueries({queryKey:["pay-wallet"]});await client.invalidateQueries({queryKey:["pay-wallet-overview"]})},onError:(cause:Error)=>setError(describeError(cause))});
+ const mutate=useMutation({mutationFn:()=>{if(!selected||!mode)throw new Error(t("wallet.error.noSelection")); return mode==="recharge"?apiWrite<void>("/admin/pay/wallet/manual-recharge","POST",{userId:selected.userId,amount,remark:remark.trim()}):apiWrite<void>("/admin/pay/wallet/update-balance","PUT",{userId:selected.userId,balance:amount})},onSuccess:async()=>{setMode(null);setAmount(0);setRemark("");setFieldErrors({});await client.invalidateQueries({queryKey:["pay-wallet"]});await client.invalidateQueries({queryKey:["pay-wallet-overview"]})},onError:(cause:Error)=>{setError(describeError(cause));setFieldErrors(describeFieldErrors(cause))}});
  const columns:DataColumn<Wallet>[]=[
   {key:"user",header:t("wallet.column.userWallet"),cell:r=><div><strong className="block text-[var(--foreground)]">{t("common.userLabel",{userId:r.userId})}</strong><code className="text-[10px] text-[var(--muted-foreground)]">Wallet #{r.id}</code></div>},
   {key:"balance",header:t("wallet.field.balance"),cell:r=><span className="font-semibold tabular-nums">{money(r.balance)}</span>},
@@ -101,6 +101,6 @@ export default function Page(){
    </div>},
   ]} rows={cards.data??[]} rowKey={(r:BankCard)=>r.id} loading={cards.isPending} error={cards.error?describeError(cards.error):null} minWidth={760}/>}
   {canReveal&&<p className="mt-3 text-[11px] text-[var(--muted-foreground)]">{t("wallet.cards.revealNote")}</p>}</Drawer>
-  <Drawer open={Boolean(selected&&mode)} onClose={()=>setMode(null)} title={mode==="recharge"?t("wallet.action.manualRecharge"):t("wallet.action.adjustBalance")} description={selected?t("common.userLabel",{userId:selected.userId}):undefined} footer={<><Button variant="ghost" onClick={()=>setMode(null)}>{t("common.action.cancel")}</Button><Button variant={mode==="recharge"?"default":"destructive"} disabled={mutate.isPending||!selected||amount<0||(mode==="recharge"&&(!remark.trim()||amount<=0))} onClick={()=>mutate.mutate()}>{mutate.isPending?t("common.action.processing"):t("common.action.confirmSubmit")}</Button></>}>{error&&<div className="mb-4 rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</div>}<div className="space-y-4"><Field label={mode==="recharge"?t("wallet.adjust.rechargeAmount"):t("wallet.adjust.targetBalance")}><Input type="number" min={0} value={amount} onChange={e=>setAmount(Number(e.target.value))}/></Field>{mode==="recharge"&&<Field label={t("wallet.adjust.remark")}><Input value={remark} onChange={e=>setRemark(e.target.value)} placeholder={t("wallet.adjust.remarkPlaceholder")}/></Field>}</div></Drawer>
+  <Drawer open={Boolean(selected&&mode)} onClose={()=>setMode(null)} title={mode==="recharge"?t("wallet.action.manualRecharge"):t("wallet.action.adjustBalance")} description={selected?t("common.userLabel",{userId:selected.userId}):undefined} footer={<><Button variant="ghost" onClick={()=>setMode(null)}>{t("common.action.cancel")}</Button><Button variant={mode==="recharge"?"default":"destructive"} disabled={mutate.isPending||!selected||amount<0||(mode==="recharge"&&(!remark.trim()||amount<=0))} onClick={()=>mutate.mutate()}>{mutate.isPending?t("common.action.processing"):t("common.action.confirmSubmit")}</Button></>}>{error&&<div className="mb-4 rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</div>}<div className="space-y-4"><Field label={mode==="recharge"?t("wallet.adjust.rechargeAmount"):t("wallet.adjust.targetBalance")} error={fieldErrors.amount??fieldErrors.balance}><Input type="number" min={0} value={amount} onChange={e=>setAmount(Number(e.target.value))}/></Field>{mode==="recharge"&&<Field label={t("wallet.adjust.remark")} error={fieldErrors.remark}><Input value={remark} onChange={e=>setRemark(e.target.value)} placeholder={t("wallet.adjust.remarkPlaceholder")}/></Field>}</div></Drawer>
  </div>
 }
