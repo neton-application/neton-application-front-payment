@@ -306,6 +306,7 @@ const messages: Record<string, string> = {
   "error.PAY_ORDER_NOT_FOUND": "订单不存在",
   "error.PAY_ORDER_NOT_PAID": "订单未支付成功，不能退款",
   "error.MOCK_PAY_DISABLED": "模拟支付未开启",
+  "error.PAY_ENDPOINT_FORBIDDEN": "支付渠道的网关地址不是公网地址且部署的出站策略未放行，或解析不出地址",
 };
 
 export default messages;
