@@ -307,6 +307,15 @@ const messages: Record<string, string> = {
   "error.PAY_ORDER_NOT_PAID": "The order was not paid successfully and cannot be refunded",
   "error.MOCK_PAY_DISABLED": "Mock payment is disabled",
   "error.PAY_ENDPOINT_FORBIDDEN": "The payment channel's gateway address is not public and the deployment's egress policy does not allow it, or it could not be resolved",
+  "order.sync.action": "Sync payment status",
+  "order.sync.failed": "Sync failed: {error}",
+  "order.sync.result.PAID": "The payment platform confirmed the payment; the order is now paid and credited.",
+  "order.sync.result.ALREADY_FINAL": "This order is no longer waiting for payment; nothing to sync.",
+  "order.sync.result.WAITING": "The payment platform reports this order as unpaid.",
+  "order.sync.result.UNSUPPORTED": "This channel does not support order queries (e.g. sandbox). For payments received offline, use the business-side manual top-up.",
+  "order.sync.result.QUERY_FAILED": "Querying the payment platform failed: {message}",
+  "order.sync.result.AMOUNT_MISMATCH": "The platform reports a payment, but the amount does not match the order. Not credited; please check manually.",
+  "order.sync.result.NOT_FOUND": "Order not found.",
 };
 
 export default messages;

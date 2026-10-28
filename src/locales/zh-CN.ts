@@ -307,6 +307,15 @@ const messages: Record<string, string> = {
   "error.PAY_ORDER_NOT_PAID": "订单未支付成功，不能退款",
   "error.MOCK_PAY_DISABLED": "模拟支付未开启",
   "error.PAY_ENDPOINT_FORBIDDEN": "支付渠道的网关地址不是公网地址且部署的出站策略未放行，或解析不出地址",
+  "order.sync.action": "同步支付状态",
+  "order.sync.failed": "同步失败：{error}",
+  "order.sync.result.PAID": "支付平台确认已付款，订单已置为已支付并入账。",
+  "order.sync.result.ALREADY_FINAL": "这笔订单已不是待支付状态，无需同步。",
+  "order.sync.result.WAITING": "支付平台显示这笔订单尚未付款。",
+  "order.sync.result.UNSUPPORTED": "该支付渠道不支持查单（如沙箱），无法同步。确认线下已收款的，请用业务侧的手动充值处理。",
+  "order.sync.result.QUERY_FAILED": "向支付平台查单失败：{message}",
+  "order.sync.result.AMOUNT_MISMATCH": "支付平台显示已付款，但金额与订单不符，未入账，请人工核查。",
+  "order.sync.result.NOT_FOUND": "订单不存在。",
 };
 
 export default messages;
