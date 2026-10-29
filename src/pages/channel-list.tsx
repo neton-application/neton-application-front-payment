@@ -45,7 +45,7 @@ export default function Page() {
       { key: "method", label: t("channel.field.method"), required: true, format: "mono", placeholder: t("channel.placeholder.method") },
       { key: "displayMode", label: t("channel.field.displayMode"), type: "select", defaultValue: "REDIRECT_URL", options: displayModes, table: false },
       { key: "platformChannelId", label: t("channel.field.platformChannelId"), table: false, placeholder: t("channel.placeholder.platformChannelId") },
-      { key: "config", label: t("channel.field.config"), type: "textarea", required: true, table: false, placeholder: '{"appId":"...","privateKey":"..."}' },
+      { key: "config", label: t("channel.field.config"), type: "textarea", required: true, table: false, hint: t("channel.hint.config"), placeholder: '{"appId":"...","privateKey":"..."}' },
       { key: "feeRate", label: t("channel.field.feeRate"), type: "number", defaultValue: 0 },
       { key: "status", label: t("common.field.status"), type: "select", defaultValue: 1, format: "status", options: status },
       { key: "remark", label: t("common.field.remark"), type: "textarea", table: false },
