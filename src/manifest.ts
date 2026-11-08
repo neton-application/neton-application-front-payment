@@ -10,6 +10,7 @@ export default defineFrontModule({
     {key:"pay/notify/index",path:"/pay/notify",entry:"notify-list",rendering:"client"},
     {key:"pay/transfer/index",path:"/pay/transfer",entry:"transfer-list",rendering:"client"},
     {key:"pay/wallet/balance/index",path:"/pay/wallet/balance",entry:"wallet-list",rendering:"client"},
+    {key:"pay/consumption-balance/index",path:"/pay/user-balance",entry:"consumption-balance-list",rendering:"client"},
     {key:"pay/wallet/rechargePackage/index",path:"/pay/wallet/recharge-package",entry:"recharge-package-list",rendering:"client"},
     {key:"pay/withdraw/index",path:"/pay/withdraw",entry:"withdraw-list",rendering:"client"},
     {key:"pay/wallet/freeze/index",path:"/pay/wallet/freeze",entry:"freeze-list",rendering:"client"}
